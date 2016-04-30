@@ -3,7 +3,7 @@ import ply.yacc as yacc
 # Get the token map from the lexer.  This is required.
 from lex import tokens
 
-DEBUG = True
+DEBUG = False
 
 # Namespace & built-in functions
 
@@ -131,6 +131,11 @@ def p_exp_dbcall(p):
     p[0] = p[3]
     letterdict.clear()
 
+def p_exp_boolcall(p):
+    'exp : LPAREN call RPAREN'
+    if DEBUG: print p[2]
+    p[0] = p[2]
+
 def p_exp_atom(p):
     'exp : atom'
     p[0] = p[1]
@@ -187,10 +192,19 @@ def p_call_assign(p):
     'call : LET LPAREN SIMB NUM RPAREN'
     letterdict[p[3]] = p[4]
 
+def p_call_bool(p):
+    'call : IF bool atom atom'
+    if p[2]:
+        if DEBUG: print "bool is True"
+        p[0] = p[3]
+    else:
+        if DEBUG: print "bool is False"
+        p[0] = p[4]
+
 def p_call(p):
     'call : LPAREN SIMB items RPAREN'
-    if DEBUG: print "Calling", p[2], "with", p[3] 
-    p[0] = lisp_eval(p[2], p[3])   
+    if DEBUG: print "Calling", p[2], "with", p[3]
+    p[0] = lisp_eval(p[2], p[3])
 
 def p_atom_simbol(p):
     'atom : SIMB'
